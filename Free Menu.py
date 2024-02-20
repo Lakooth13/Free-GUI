@@ -1,0 +1,153 @@
+import tkinter as tk
+from tkinter import messagebox
+from tkinter import simpledialog
+import requests
+import time
+
+# Function to handle mouse down event
+def on_mouse_down(event):
+    global last_x, last_y
+    last_x = event.x
+    last_y = event.y
+
+# Function to handle mouse move event
+def on_mouse_move(event):
+    global last_x, last_y
+    new_x = root.winfo_x() + (event.x - last_x)
+    new_y = root.winfo_y() + (event.y - last_y)
+    root.geometry(f"+{new_x}+{new_y}")
+
+# Function to handle mouse up event
+def on_mouse_up(event):
+    pass
+
+# Function to show information message
+def show_info():
+    messagebox.showinfo("Information", "THIS PROGRAM IS USED FOR EDUCATIONAL PURPOSES ONLY.\n\n"
+                                        "I AM NOT RESPONSIBLE FOR ANY TROUBLE/LEGAL ACTION AGAINST USERS.\n\n"
+                                        "THANK YOU!")
+
+# Function to close the program
+def close_program():
+    root.destroy()
+
+# Function to cycle through border colors
+def change_border_color():
+    global color_index
+    color_index = (color_index + 1) % len(colors)
+    canvas.itemconfig(border, outline=colors[color_index])
+    root.title("RILEY'S HUB - " + colors[color_index].upper())  # Update title with border color
+    root.configure(bg="black")  # Set background color to straight black
+    root.update_idletasks()  # Update GUI to reflect changes
+
+# Function to remove middle text and show "Webhook spammer" button
+def remove_middle_text():
+    message_text.place_forget()  # Remove the middle text
+    next_button.place_forget()  # Remove the "Next" button
+    webhook_button.place(relx=0.5, rely=0.4, anchor="center")  # Show "Webhook spammer" button
+    back_button.place(relx=0.05, rely=0.95, anchor="sw")  # Position "Back" button bottom left
+    webhook_text.place(relx=0.5, rely=0.7, anchor="center")  # Show text below the "Webhook spammer" button with proper fit
+
+# Function to go back to the initial state
+def go_back():
+    webhook_button.place_forget()  # Remove the "Webhook spammer" button
+    back_button.place_forget()  # Remove the "Back" button
+    message_text.place(relx=0.5, rely=0.45, anchor="center")  # Show middle text
+    next_button.place(relx=0.95, rely=0.95, anchor="se")  # Show "Next" button bottom right
+    webhook_text.place_forget() # Remove the webhook text
+
+# Function to handle webhook spamming
+def spam_webhook():
+    webhook_url = simpledialog.askstring("Input", "Enter the Discord webhook URL:")
+    if webhook_url:
+        times = simpledialog.askinteger("Input", "How many times do you want to spam?")
+        if times:
+            message = simpledialog.askstring("Input", "What would you like to say?")
+            if message:
+                speed = simpledialog.askfloat("Input", "How fast do you want to spam? (Enter a number between 0.1 and 1 seconds):")
+                if speed and 0.1 <= speed <= 1:
+                    for _ in range(times):
+                        payload = {
+                            "content": f"{message} @everyone"
+                        }
+                        requests.post(webhook_url, json=payload)
+                        time.sleep(speed)
+                else:
+                    messagebox.showerror("Error", "Speed must be between 0.1 and 1 seconds.")
+
+# Create the main application window
+root = tk.Tk()
+
+# Remove the window border
+root.overrideredirect(True)
+
+# Set the background color to straight black
+root.configure(bg="black")
+
+# Set the size of the window
+root.geometry("449x496")
+
+# Create a Canvas widget
+canvas = tk.Canvas(root, width=449, height=496, bg='black', highlightthickness=0)
+canvas.pack()
+
+# Define the list of colors for the border
+colors = ["white", "yellow", "blue", "red", "green", "black", "brown", "azure", "ivory", "teal",
+          "silver", "purple", "navy blue", "pea green", "gray", "orange", "maroon", "charcoal",
+          "aquamarine", "coral", "fuchsia", "wheat", "lime", "crimson", "khaki", "hot pink",
+          "magenta", "olden", "plum", "olive", "cyan"]
+
+color_index = 0  # Initialize color index
+
+# Create the border rectangle with increased thickness
+border = canvas.create_rectangle(0, 0, 448, 495, outline=colors[0], width=3)  # Adjusted coordinates and increased width
+
+# Add label at the top but slightly below
+label = tk.Label(root, text="TOOL HUB", font=("Verdana", 20, "bold"), fg="white", bg="black")
+label.place(relx=0.5, rely=0.1, anchor="center")  # Adjust rely to position slightly below the top
+
+# Create the info button
+info_button = tk.Button(root, text="INFO", font=("Arial", 12, "bold"), fg="gray", bg="black", bd=0, command=show_info)
+info_button.place(relx=0.05, rely=0.03, anchor="nw")  # Position at the top left corner
+
+# Create the close button
+close_button = tk.Button(root, text="X", font=("Arial", 14, "bold"), fg="gray", bg="black", bd=0, command=close_program)
+close_button.place(relx=0.95, rely=0.03, anchor="ne")  # Position at the top right corner
+
+# Create the border color button
+color_button = tk.Button(root, text="CHANGE COLOR", font=("Arial", 12, "bold"), fg="gray", bg="black", bd=0, command=change_border_color)
+color_button.place(relx=0.5, rely=0.95, anchor="s")  # Position at the bottom center
+
+# Create the message text
+message_text = tk.Label(root, text="hi, thanks for using my tool. this is a multi-tool powerful program. please for the love of god read the info tab before u and I get in trouble. oh and click the next button to get started. Thank you <3", font=("Arial", 12), fg="gray", bg="black", wraplength=400, justify="center")
+message_text.place(relx=0.5, rely=0.45, anchor="center")
+
+# Create the "Next" button
+next_button = tk.Button(root, text="Next", font=("Arial", 12, "bold"), fg="gray", bg="black", bd=0, command=remove_middle_text)
+next_button.place(relx=0.95, rely=0.95, anchor="se")  # Position "Next" button bottom right initially
+
+# Create the "Back" button (hidden initially)
+back_button = tk.Button(root, text="Back", font=("Arial", 12, "bold"), fg="gray", bg="black", bd=0, command=go_back)
+
+# Create the webhook button (hidden initially)
+webhook_button = tk.Button(root, text="Webhook spammer", font=("Arial", 12, "bold"), fg="gray", bg="black", bd=0, command=spam_webhook)
+webhook_button.place_forget()  # Initially hide the "Webhook spammer" button
+
+# Create the text for webhook spammer
+webhook_text = tk.Label(root, text="A webhook spammer is a Discord tool that continuously sends a large number of messages to a channel.", font=("Arial", 10), fg="gray", bg="black", wraplength=400, justify="center")
+webhook_text.place_forget()  # Initially hide the text
+
+# Function to style the "Webhook spammer" button like the "Change color" button
+def style_webhook_button():
+    webhook_button.configure(fg="gray", bg="black", bd=0, font=("Arial", 12, "bold"))
+
+# Call the function to style the "Webhook spammer" button
+style_webhook_button()
+
+# Bind mouse events to functions
+root.bind("<Button-1>", on_mouse_down)
+root.bind("<B1-Motion>", on_mouse_move)
+root.bind("<ButtonRelease-1>", on_mouse_up)
+
+# Run the main event loop
+root.mainloop()
